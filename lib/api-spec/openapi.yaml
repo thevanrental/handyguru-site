@@ -1,0 +1,144 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: HandyGuru API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: contact
+    description: Contact and estimate requests
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /contact:
+    post:
+      operationId: submitContact
+      tags: [contact]
+      summary: Submit a contact or estimate request
+      description: Saves a contact/estimate form submission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactInput"
+      responses:
+        "201":
+          description: Submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactSubmission"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      operationId: listContacts
+      tags: [contact]
+      summary: List all contact submissions
+      responses:
+        "200":
+          description: List of submissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContactSubmission"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    ContactInput:
+      type: object
+      required:
+        - name
+        - phone
+        - serviceType
+        - message
+      properties:
+        name:
+          type: string
+          minLength: 1
+        phone:
+          type: string
+          minLength: 1
+        email:
+          type: ["string", "null"]
+        serviceType:
+          type: string
+          description: "Category of service requested"
+        jobSize:
+          type: ["string", "null"]
+          description: "Estimated job size: small, medium, large"
+        estimatedBudget:
+          type: ["string", "null"]
+          description: "Budget range selected by user"
+        message:
+          type: string
+          minLength: 1
+        preferredContact:
+          type: ["string", "null"]
+          description: "phone or email"
+    ContactSubmission:
+      type: object
+      required:
+        - id
+        - name
+        - phone
+        - serviceType
+        - message
+        - createdAt
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: ["string", "null"]
+        serviceType:
+          type: string
+        jobSize:
+          type: ["string", "null"]
+        estimatedBudget:
+          type: ["string", "null"]
+        message:
+          type: string
+        preferredContact:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
